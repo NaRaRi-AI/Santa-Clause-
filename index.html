@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Миссия: Спасти Рождество</title>
+    <style>
+        :root {
+            --bg-night: #091224;
+            --card-bg: rgba(14, 23, 44, 0.92);
+            --accent-gold: #f3c653;
+            --accent-silver: #d4e4f7;
+            --accent-red: #c23b3b;
+            --accent-green: #2d6a4f;
+            --text-light: #f5f7fc;
+            --border-frost: #b4d2e8;
+        }
+
+        body {
+            background-color: var(--bg-night);
+            color: var(--text-light);
+            font-family: 'Georgia', serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(45, 106, 79, 0.3) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(194, 59, 59, 0.25) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, #15264a 0%, #091224 90%);
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 750px;
+            background: var(--card-bg);
+            border: 2px solid var(--border-frost);
+            border-radius: 18px;
+            box-shadow: 
+                0 0 25px rgba(180, 210, 232, 0.25),
+                0 0 50px rgba(243, 198, 83, 0.12),
+                inset 0 0 15px rgba(180, 210, 232, 0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(7, 12, 24, 0.95);
+            padding: 14px;
+            border-bottom: 1px solid rgba(180, 210, 232, 0.3);
+            font-size: 14px;
+            color: var(--accent-gold);
+            text-shadow: 0 0 8px rgba(243, 198, 83, 0.4);
+        }
+
+        .scene-image {
+            width: 100%;
+            height: 270px;
+            object-fit: cover;
+            border-bottom: 2px solid var(--border-frost);
+            background-color: #121d36;
+            filter: brightness(0.95) contrast(1.05);
+        }
+
+        .content-area {
+            padding: 28px;
+            flex-grow: 1;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: var(--accent-gold);
+            font-family: 'Times New Roman', serif;
+            font-size: 24px;
+            text-shadow: 0 0 10px rgba(243, 198, 83, 0.3);
+        }
+
+        p {
+            line-height: 1.7;
+            margin-bottom: 24px;
+            font-size: 17px;
+            color: #e2e8f5;
+        }
+
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        button {
+            background: linear-gradient(to bottom, #1d3361, #0f1c38);
+            color: var(--text-light);
+            border: 1px solid var(--border-frost);
+            padding: 14px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            font-size: 15px;
+            text-align: left;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        button:hover {
+            background: linear-gradient(to bottom, #2b4987, #172a52);
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(243, 198, 83, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .inventory-box {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px dashed rgba(212, 228, 247, 0.25);
+            font-size: 14px;
+            color: var(--accent-silver);
+        }
+
+        #items-text {
+            color: var(--accent-gold);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="status-bar">
+        <span id="stat-time">🕒 Время: 12:00</span>
+        <span id="stat-spirit">✨ Дух Рождества: 100%</span>
+        <span id="stat-inventory">🎒 Предметы: нет</span>
+    </div>
+
+    <img id="scene-img" class="scene-image" src="" alt="Иллюстрация локации">
+
+    <div class="content-area">
+        <h2 id="scene-title">Заголовок сцены</h2>
+        <p id="scene-text">Текст сцены загружается...</p>
+        
+        <div class="choices" id="choices-box">
+            <!-- Кнопки выбора -->
+        </div>
+
+        <div class="inventory-box">
+            Инвентарь: <span id="items-text">нет</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    let state = {
+        time: 12, // от 12:00 до 24:00
+        spirit: 100,
+        inventory: [],
+        currentScene: 'start'
+    };
+
+    const scenes = {
+        start: {
+            title: "Акт I. Полуденная побудка",
+            text: "Тик-так... Маятник в кабинете отсчитывает полдень. До старта новогоднего полета ровно 12 часов. За окном воет лапландская метель, а в дверь тревожно стучит главный эльф-бригадир.",
+            image: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?auto=format&fit=crop&w=800&q=80",
+            choices: [
+                { text: "Выпить чашку горячего пряного какао и впустить эльфа", next: 'meet_elf', timeCost: 1, spiritChange: 5, addItem: 'Чашка какао' },
+                { text: "Сразу открыть дверь и выслушать проблему", next: 'meet_elf', timeCost: 1, spiritChange: 0 },
+                { text: "Заглянуть в волшебное зеркало погоды", next: 'magic_mirror', timeCost: 1, spiritChange: 0 }
+            ]
+        },
+        meet_elf: {
+            title: "Паника на фабрике",
+            text: "Эльф врывается внутрь: 'Санта! Катастрофа! Магический конвейер подарков заклинило шестеренками, а олени в загоне испугались ледяных шипов и не хотят запрягаться!'",
+            image: "https://images.unsplash.com/photo-1512389142860-9c449e580543?auto=format&fit=crop&w=800&q=80",
+            choices: [
+                { text: "Срочно идти на фабрику чинить конвейер", next: 'factory_puzzle', timeCost: 2 },
+                { text: "Сначала отправиться в загон и успокоить оленей", next: 'reindeer_pen', timeCost: 2 }
+            ]
+        },
+        magic_mirror: {
+            title: "Волшебное зеркало",
+            text: "В глади зеркала видны заснеженные города Европы и Америки. Дети ждут чуда, но времени до вечера остается все меньше.",
+            image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80",
+            choices: [
+                { text: "Вернуться к дверям кабинета и впустить эльфа", next: 'meet_elf', timeCost: 1 }
+            ]
+        },
+        factory_puzzle: {
+            title: "Фабрика подарков",
+            text: "Механические игрушки застряли в шестеренках. Нужно принять решение, как запустить конвейер без потерь.",
+            image: "https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80",
+            choices: [
+                { text: "Использовать магический посох для перезапуска", next: 'act_one_finish', timeCost: 2, spiritChange: 5 },
+                { text: "Разобрать механизм вручную по старым чертежам", next: 'act_one_finish', timeCost: 3, spiritChange: 10, addItem: 'Чертеж шестеренок' }
+            ]
+        },
+        reindeer_pen: {
+            title: "Загон для оленей",
+            text: "Северные олени тревожно бьют копытами. Вожак смотрит на сугробы со странными кристаллами.",
+            image: "https://images.unsplash.com/photo-1483982258113-b72862e6cff6?auto=format&fit=crop&w=800&q=80",
+            choices: [
+                { text: "Угостить оленей моховым печеньем и успокоить", next: 'act_one_finish', timeCost: 2, spiritChange: 10, addItem: 'Доверие оленей' }
+            ]
+        },
+        act_one_finish: {
+            title: "Конец Акта I",
+            text: "Первая часть трудностей позади. Конвейер и олени приведены в порядок, но вечер уже на пороге, а впереди алхимия саней и ночной полет!",
+            image: "https://images.unsplash.com/photo-1512389142860-9c449e580543?auto=format&fit=crop&w=800&q=80",
+            choices: [
+                { text: "Начать сначала (для проверки других путей)", next: 'start', timeCost: 0, reset: true }
+            ]
+        }
+    };
+
+    function updateGame(sceneKey) {
+        let scene = scenes[sceneKey];
+        if (!scene) return;
+
+        state.currentScene = sceneKey;
+
+        document.getElementById('scene-title').innerText = scene.title;
+        document.getElementById('scene-text').innerText = scene.text;
+        document.getElementById('scene-img').src = scene.image;
+
+        document.getElementById('stat-time').innerText = `🕒 Время: ${state.time}:00`;
+        document.getElementById('stat-spirit').innerText = `✨ Дух Рождества: ${state.spirit}%`;
+        document.getElementById('items-text').innerText = state.inventory.length > 0 ? state.inventory.join(', ') : 'нет';
+
+        let choicesBox = document.getElementById('choices-box');
+        choicesBox.innerHTML = '';
+
+        scene.choices.forEach(choice => {
+            let btn = document.createElement('button');
+            btn.innerText = choice.text;
+            btn.onclick = () => {
+                if (choice.reset) {
+                    state.time = 12;
+                    state.spirit = 100;
+                    state.inventory = [];
+                    updateGame('start');
+                    return;
+                }
+
+                state.time += choice.timeCost || 1;
+                if (choice.spiritChange) {
+                    state.spirit = Math.min(100, Math.max(0, state.spirit + choice.spiritChange));
+                }
+                if (choice.addItem && !state.inventory.includes(choice.addItem)) {
+                    state.inventory.push(choice.addItem);
+                }
+
+                updateGame(choice.next);
+            };
+            choicesBox.appendChild(btn);
+        });
+
+        localStorage.setItem('santa_quest_single_state', JSON.stringify(state));
+    }
+
+    window.onload = function() {
+        let saved = localStorage.getItem('santa_quest_single_state');
+        if (saved) {
+            try {
+                let parsed = JSON.parse(saved);
+                state = parsed;
+                updateGame(state.currentScene);
+                return;
+            } catch(e) {}
+        }
+        updateGame('start');
+    };
+</script>
+
+</body>
+</html>
