@@ -7,7 +7,7 @@
     <style>
         :root {
             --bg-night: #091224;
-            --card-bg: rgba(14, 23, 44, 0.92);
+            --card-bg: rgba(14, 23, 44, 0.95);
             --accent-gold: #f3c653;
             --accent-silver: #d4e4f7;
             --accent-red: #c23b3b;
@@ -21,7 +21,7 @@
             color: var(--text-light);
             font-family: 'Georgia', serif;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -51,46 +51,84 @@
             display: flex;
             justify-content: space-around;
             background: rgba(7, 12, 24, 0.95);
-            padding: 14px;
+            padding: 12px;
             border-bottom: 1px solid rgba(180, 210, 232, 0.3);
-            font-size: 14px;
+            font-size: 13px;
             color: var(--accent-gold);
             text-shadow: 0 0 8px rgba(243, 198, 83, 0.4);
         }
 
-        .scene-image {
+        /* Сказочный визуальный блок вместо битых картинок */
+        .scene-visual {
             width: 100%;
-            height: 270px;
-            object-fit: cover;
+            height: 180px;
+            background: linear-gradient(135deg, #121d36, #1f3560);
             border-bottom: 2px solid var(--border-frost);
-            background-color: #121d36;
-            filter: brightness(0.95) contrast(1.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 10px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .scene-icon {
+            font-size: 55px;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 0 10px rgba(243, 198, 83, 0.4));
+        }
+
+        .scene-subtitle {
+            font-size: 14px;
+            color: var(--accent-silver);
+            font-style: italic;
         }
 
         .content-area {
-            padding: 28px;
+            padding: 22px;
             flex-grow: 1;
         }
 
+        .speaker-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .speaker-avatar {
+            font-size: 32px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-gold);
+            background: #15264a;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
         h2 {
-            margin-top: 0;
+            margin: 0;
             color: var(--accent-gold);
             font-family: 'Times New Roman', serif;
-            font-size: 24px;
+            font-size: 22px;
             text-shadow: 0 0 10px rgba(243, 198, 83, 0.3);
         }
 
         p {
-            line-height: 1.7;
-            margin-bottom: 24px;
-            font-size: 17px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-size: 16px;
             color: #e2e8f5;
         }
 
         .choices {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             margin-top: 20px;
         }
 
@@ -98,11 +136,11 @@
             background: linear-gradient(to bottom, #1d3361, #0f1c38);
             color: var(--text-light);
             border: 1px solid var(--border-frost);
-            padding: 14px 18px;
+            padding: 12px 16px;
             border-radius: 10px;
             cursor: pointer;
             font-family: 'Georgia', serif;
-            font-size: 15px;
+            font-size: 14px;
             text-align: left;
             transition: all 0.25s ease;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
@@ -116,15 +154,11 @@
             box-shadow: 0 6px 15px rgba(243, 198, 83, 0.2);
         }
 
-        button:active {
-            transform: translateY(0);
-        }
-
         .inventory-box {
-            margin-top: 25px;
-            padding-top: 15px;
+            margin-top: 20px;
+            padding-top: 12px;
             border-top: 1px dashed rgba(212, 228, 247, 0.25);
-            font-size: 14px;
+            font-size: 13px;
             color: var(--accent-silver);
         }
 
@@ -143,15 +177,20 @@
         <span id="stat-inventory">🎒 Предметы: нет</span>
     </div>
 
-    <img id="scene-img" class="scene-image" src="" alt="Иллюстрация локации">
+    <!-- Визуальный блок с атмосферой -->
+    <div class="scene-visual">
+        <div id="scene-icon" class="scene-icon">🏰</div>
+        <div id="scene-subtitle" class="scene-subtitle">Резиденция Санты в Лапландии</div>
+    </div>
 
     <div class="content-area">
-        <h2 id="scene-title">Заголовок сцены</h2>
+        <div class="speaker-box">
+            <div id="speaker-avatar" class="speaker-avatar">🧝</div>
+            <h2 id="scene-title">Заголовок сцены</h2>
+        </div>
         <p id="scene-text">Текст сцены загружается...</p>
         
-        <div class="choices" id="choices-box">
-            <!-- Кнопки выбора -->
-        </div>
+        <div class="choices" id="choices-box"></div>
 
         <div class="inventory-box">
             Инвентарь: <span id="items-text">нет</span>
@@ -161,7 +200,7 @@
 
 <script>
     let state = {
-        time: 12, // от 12:00 до 24:00
+        time: 12,
         spirit: 100,
         inventory: [],
         currentScene: 'start'
@@ -171,7 +210,9 @@
         start: {
             title: "Акт I. Полуденная побудка",
             text: "Тик-так... Маятник в кабинете отсчитывает полдень. До старта новогоднего полета ровно 12 часов. За окном воет лапландская метель, а в дверь тревожно стучит главный эльф-бригадир.",
-            image: "https://images.unsplash.com/photo-1543589077-47d81606c1bf?auto=format&fit=crop&w=800&q=80",
+            icon: "🪵",
+            subtitle: "Кабинет Санты: камин, гирлянды и письма",
+            speaker: null,
             choices: [
                 { text: "Выпить чашку горячего пряного какао и впустить эльфа", next: 'meet_elf', timeCost: 1, spiritChange: 5, addItem: 'Чашка какао' },
                 { text: "Сразу открыть дверь и выслушать проблему", next: 'meet_elf', timeCost: 1, spiritChange: 0 },
@@ -179,9 +220,11 @@
             ]
         },
         meet_elf: {
-            title: "Паника на фабрике",
-            text: "Эльф врывается внутрь: 'Санта! Катастрофа! Магический конвейер подарков заклинило шестеренками, а олени в загоне испугались ледяных шипов и не хотят запрягаться!'",
-            image: "https://images.unsplash.com/photo-1512389142860-9c449e580543?auto=format&fit=crop&w=800&q=80",
+            title: "Главный эльф-бригадир",
+            text: "Эльф врывается внутрь, размахивая шапкой: 'Санта! Катастрофа! Магический конвейер подарков заклинило шестеренками, а олени в загоне испугались ледяных шипов и не хотят запрягаться!'",
+            icon: "🧝",
+            subtitle: "Паника на эльфийской фабрике",
+            speaker: "🧝",
             choices: [
                 { text: "Срочно идти на фабрику чинить конвейер", next: 'factory_puzzle', timeCost: 2 },
                 { text: "Сначала отправиться в загон и успокоить оленей", next: 'reindeer_pen', timeCost: 2 }
@@ -189,35 +232,43 @@
         },
         magic_mirror: {
             title: "Волшебное зеркало",
-            text: "В глади зеркала видны заснеженные города Европы и Америки. Дети ждут чуда, но времени до вечера остается все меньше.",
-            image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80",
+            text: "В глади зеркала видны заснеженные города. Дети ждут чуда, но над полюсом клубится страшный шторм, затягивая время.",
+            icon: "🔮",
+            subtitle: "Обсерватория погоды",
+            speaker: null,
             choices: [
-                { text: "Вернуться к дверям кабинета и впустить эльфа", next: 'meet_elf', timeCost: 1 }
+                { text: "Отойти от зеркала и впустить эльфа в кабинет", next: 'meet_elf', timeCost: 1 }
             ]
         },
         factory_puzzle: {
             title: "Фабрика подарков",
-            text: "Механические игрушки застряли в шестеренках. Нужно принять решение, как запустить конвейер без потерь.",
-            image: "https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80",
+            text: "Механические игрушки застряли между медными шестеренками. Нужно принять техническое решение, как запустить конвейер.",
+            icon: "⚙️",
+            subtitle: "Эльфийский цех сборки",
+            speaker: "🎅",
             choices: [
-                { text: "Использовать магический посох для перезапуска", next: 'act_one_finish', timeCost: 2, spiritChange: 5 },
+                { text: "Использовать магический посох для безопасного перезапуска", next: 'act_one_finish', timeCost: 2, spiritChange: 5 },
                 { text: "Разобрать механизм вручную по старым чертежам", next: 'act_one_finish', timeCost: 3, spiritChange: 10, addItem: 'Чертеж шестеренок' }
             ]
         },
         reindeer_pen: {
             title: "Загон для оленей",
-            text: "Северные олени тревожно бьют копытами. Вожак смотрит на сугробы со странными кристаллами.",
-            image: "https://images.unsplash.com/photo-1483982258113-b72862e6cff6?auto=format&fit=crop&w=800&q=80",
+            text: "Северные олени тревожно бьют копытами. Вожак косит глазом на темные колючие сорняки, пробившиеся сквозь снег.",
+            icon: "🦌",
+            subtitle: "Загон под северным сиянием",
+            speaker: "🎅",
             choices: [
-                { text: "Угостить оленей моховым печеньем и успокоить", next: 'act_one_finish', timeCost: 2, spiritChange: 10, addItem: 'Доверие оленей' }
+                { text: "Угостить оленей моховым печеньем и расчистить снег", next: 'act_one_finish', timeCost: 2, spiritChange: 10, addItem: 'Доверие оленей' }
             ]
         },
         act_one_finish: {
             title: "Конец Акта I",
             text: "Первая часть трудностей позади. Конвейер и олени приведены в порядок, но вечер уже на пороге, а впереди алхимия саней и ночной полет!",
-            image: "https://images.unsplash.com/photo-1512389142860-9c449e580543?auto=format&fit=crop&w=800&q=80",
+            icon: "✨",
+            subtitle: "Переход к Акту II",
+            speaker: "🎅",
             choices: [
-                { text: "Начать сначала (для проверки других путей)", next: 'start', timeCost: 0, reset: true }
+                { text: "Начать сначала (проверить другие развилки)", next: 'start', timeCost: 0, reset: true }
             ]
         }
     };
@@ -230,7 +281,16 @@
 
         document.getElementById('scene-title').innerText = scene.title;
         document.getElementById('scene-text').innerText = scene.text;
-        document.getElementById('scene-img').src = scene.image;
+        document.getElementById('scene-icon').innerText = scene.icon;
+        document.getElementById('scene-subtitle').innerText = scene.subtitle;
+
+        let avatar = document.getElementById('speaker-avatar');
+        if (scene.speaker) {
+            avatar.innerText = scene.speaker;
+            avatar.style.display = 'flex';
+        } else {
+            avatar.style.display = 'none';
+        }
 
         document.getElementById('stat-time').innerText = `🕒 Время: ${state.time}:00`;
         document.getElementById('stat-spirit').innerText = `✨ Дух Рождества: ${state.spirit}%`;
@@ -264,11 +324,11 @@
             choicesBox.appendChild(btn);
         });
 
-        localStorage.setItem('santa_quest_single_state', JSON.stringify(state));
+        localStorage.setItem('santa_quest_clean_state', JSON.stringify(state));
     }
 
     window.onload = function() {
-        let saved = localStorage.getItem('santa_quest_single_state');
+        let saved = localStorage.getItem('santa_quest_clean_state');
         if (saved) {
             try {
                 let parsed = JSON.parse(saved);
