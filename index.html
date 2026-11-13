@@ -58,13 +58,30 @@
             text-shadow: 0 0 8px rgba(243, 198, 83, 0.4);
         }
 
-        .scene-image {
+        .scene-visual {
             width: 100%;
-            height: 250px;
-            object-fit: cover;
+            height: 180px;
+            background: linear-gradient(135deg, #121d36, #1f3560);
             border-bottom: 2px solid var(--border-frost);
-            background-color: #121d36;
-            filter: brightness(0.95) contrast(1.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .scene-icon {
+            font-size: 55px;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 0 10px rgba(243, 198, 83, 0.4));
+        }
+
+        .scene-subtitle {
+            font-size: 14px;
+            color: var(--accent-silver);
+            font-style: italic;
         }
 
         .content-area {
@@ -80,13 +97,15 @@
         }
 
         .speaker-avatar {
-            width: 55px;
-            height: 55px;
+            font-size: 28px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             border: 2px solid var(--accent-gold);
-            object-fit: cover;
-            background-color: #15264a;
+            background: #15264a;
             display: none;
+            justify-content: center;
+            align-items: center;
         }
 
         h2 {
@@ -156,11 +175,15 @@
         <span id="stat-inventory">🎒 Предметы: нет</span>
     </div>
 
-    <img id="scene-img" class="scene-image" src="" alt="Иллюстрация локации">
+    <!-- Визуальный блок локации -->
+    <div class="scene-visual">
+        <div id="scene-icon" class="scene-icon">🏰</div>
+        <div id="scene-subtitle" class="scene-subtitle">Резиденция Санты в Лапландии</div>
+    </div>
 
     <div class="content-area">
         <div class="speaker-box">
-            <img id="speaker-avatar" class="speaker-avatar" src="" alt="Портрет">
+            <div id="speaker-avatar" class="speaker-avatar">🎅</div>
             <h2 id="scene-title">Заголовок сцены</h2>
         </div>
         <p id="scene-text">Текст сцены загружается...</p>
@@ -174,22 +197,6 @@
 </div>
 
 <script>
-    // Ссылки на встроенные изображения (Base64) для Акта I и Акта II
-    const imgHub = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA="; // Заглушка-ссылка, далее подставляются реальные сцены
-    
-    // Хранилище картинок по ключам
-    const images = {
-        scene1: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8aMC0oMCUoKSj/wAALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=", // Кабинет
-        scene2: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8aMC0oMCUoKSj/wAALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=", // Фабрика
-        scene3: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8aMC0oMCUoKSj/wAALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=", // Загон
-        scene4: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8aMC0oMCUoKSj/wAALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=", // Зеркало
-        santa: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8aMC0oMCUoKSj/wAALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",  // Портрет Санты
-        elf: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8aMC0oMCUoKSj/wAALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",    // Портрет эльфа
-        act2_sleigh: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8aMC0oMCUoKSj/wAALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=", // Ангар саней
-        act2_map: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8aMC0oMCUoKSj/wAALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",    // Звездная карта
-        act2_takeoff: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8aMC0oMCUoKSj/wAALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=" // Ночной взлет
-    };
-
     let state = {
         time: 12,
         spirit: 100,
@@ -201,8 +208,9 @@
         start: {
             title: "Акт I. Полуденная побудка",
             text: "Тик-так... Тяжелые маятниковые часы в кабинете показывают ровно полдень. До начала новогоднего полета осталось ровно 12 часов. За окном бушует лапландская метель, а в дверь твоего кабинета доносится тревожный стук.",
-            imageKey: 'scene1',
-            speakerKey: null,
+            icon: "🪵",
+            subtitle: "Кабинет Санты: камин, гирлянды и письма",
+            speaker: null,
             choices: [
                 { text: "Отпить горячего какао со специями и впустить эльфа", next: 'meet_elf', timeCost: 1, spiritChange: 5, addItem: 'Чашка какао' },
                 { text: "Сразу распахнуть дверь и выслушать проблему", next: 'meet_elf', timeCost: 1, spiritChange: 0 },
@@ -212,8 +220,9 @@
         meet_elf: {
             title: "Главный эльф-бригадир",
             text: "Эльф врывается внутрь, размахивая шапкой: 'Санта! Катастрофа! Магический конвейер подарков заклинило шестеренками, а олени отказываются выходить из загона — кто-то разбросал по снегу странные ледяные шипы!'",
-            imageKey: 'scene2',
-            speakerKey: 'elf',
+            icon: "🧝",
+            subtitle: "Эльфийская фабрика подарков",
+            speaker: "🧝",
             choices: [
                 { text: "Срочно бежать на фабрику разбираться с конвейером", next: 'factory_puzzle', timeCost: 2 },
                 { text: "Сначала отправиться в загон к оленям и успокоить их", next: 'reindeer_pen', timeCost: 2 }
@@ -222,8 +231,9 @@
         magic_mirror: {
             title: "Волшебное зеркало",
             text: "Ты заглядываешь в гладь зеркала. Над Европой и Америкой висят грозовые тучи, но дети ждут чуда. Время утекает сквозь пальцы!",
-            imageKey: 'scene4',
-            speakerKey: 'santa',
+            icon: "🔮",
+            subtitle: "Обсерватория погоды",
+            speaker: "🎅",
             choices: [
                 { text: "Отойти от зеркала и впустить эльфа в кабинет", next: 'meet_elf', timeCost: 1 }
             ]
@@ -231,8 +241,9 @@
         factory_puzzle: {
             title: "Фабрика подарков",
             text: "Огромный механизм гудит и искрит. Механические плюшевые медведи и Щелкунчик застряли между шестеренок. Нужно быстро принять техническое решение!",
-            imageKey: 'scene2',
-            speakerKey: 'santa',
+            icon: "⚙️",
+            subtitle: "Цех сборки подарков",
+            speaker: "🎅",
             choices: [
                 { text: "Использовать магический посох, чтобы перезапустить шестеренки", next: 'act_one_finish', timeCost: 2, spiritChange: 5 },
                 { text: "Разобрать механизм вручную по старинным чертежам", next: 'act_one_finish', timeCost: 3, spiritChange: 10, addItem: 'Чертеж шестеренок' }
@@ -241,8 +252,9 @@
         reindeer_pen: {
             title: "Загон для оленей",
             text: "Гордые северные олени встревоженно бьют копытами. Вожак косит глазом на сугробы, где блещут замороженные фиолетовые сорняки.",
-            imageKey: 'scene3',
-            speakerKey: 'santa',
+            icon: "🦌",
+            subtitle: "Загон под северным сиянием",
+            speaker: "🎅",
             choices: [
                 { text: "Угостить оленей волшебным моховым печеньем", next: 'act_one_finish', timeCost: 2, spiritChange: 10, addItem: 'Моховое печенье' },
                 { text: "Ласково поговорить с вожаком и расчистить снег", next: 'act_one_finish', timeCost: 2, spiritChange: 5 }
@@ -251,8 +263,9 @@
         act_one_finish: {
             title: "Конец Акта I",
             text: "Конвейер и олени приведены в порядок. Но вечер уже на пороге (16:00), а впереди алхимия саней, подготовка упряжки и ночной полет!",
-            imageKey: 'scene1',
-            speakerKey: 'santa',
+            icon: "✨",
+            subtitle: "Переход к Акту II",
+            speaker: "🎅",
             choices: [
                 { text: "Перейти к Акту II (Вечерняя алхимия саней)", next: 'act2_start', timeCost: 0 }
             ]
@@ -262,8 +275,9 @@
         act2_start: {
             title: "Акт II. Вечерний ангар и алхимия саней",
             text: "Стрелки часов перешагнули за 16:00. Ты спускаешься в секретный ангар. Волшебные сани ждут на платформе, но их нужно срочно модернизировать перед штормом.",
-            imageKey: 'act2_sleigh',
-            speakerKey: 'santa',
+            icon: "🛷",
+            subtitle: "Секретный гараж Санты",
+            speaker: "🎅",
             choices: [
                 { text: "Установить магический реактивный ускоритель (быстро, но рискованно)", next: 'act2_route', timeCost: 1, spiritChange: -5, addItem: 'Реактивный двигатель' },
                 { text: "Натереть полозья звездным воском и закрепить амулеты", next: 'act2_route', timeCost: 2, spiritChange: 10, addItem: 'Звездный воск' }
@@ -272,8 +286,9 @@
         act2_route: {
             title: "Акт II. Планирование маршрута",
             text: "Сани готовы. Перед тобой парит голографическая карта звездного неба. Над Северным полюсом бушует циклонический фронт. Как проложим первый отрезок пути?",
-            imageKey: 'act2_map',
-            speakerKey: 'santa',
+            icon: "🗺️",
+            subtitle: "Обсерватория звездных маршрутов",
+            speaker: "🎅",
             choices: [
                 { text: "Пробиваться напрямую через Ледяной каньон (сэкономить время)", next: 'act2_takeoff_scene', timeCost: 1, spiritChange: -10 },
                 { text: "Обойти шторм по высокому Звездному коридору (безопасно, но дольше)", next: 'act2_takeoff_scene', timeCost: 2, spiritChange: 5 }
@@ -282,8 +297,9 @@
         act2_takeoff_scene: {
             title: "Акт II. Ночной взлет!",
             text: "Все приготовления завершены. Олени бьют копытами, упряжка сияет магией. Под восторженные крики эльфов сани взмывают в ночное небо навстречу северному сиянию!",
-            imageKey: 'act2_takeoff',
-            speakerKey: 'elf',
+            icon: "🌠",
+            subtitle: "Взлетная полоса Лапландии",
+            speaker: "🧝",
             choices: [
                 { text: "Завершить Акт II (Ночной полет продолжается...)", next: 'act2_finish', timeCost: 0 }
             ]
@@ -291,8 +307,9 @@
         act2_finish: {
             title: "Продолжение следует...",
             text: "Ты блестяще справился с подготовкой и вывел сани на орбиту новогодней ночи! Спасибо за прохождение доступных актов квеста.",
-            imageKey: 'scene1',
-            speakerKey: 'santa',
+            icon: "🎄",
+            subtitle: "Финал текущей версии",
+            speaker: "🎅",
             choices: [
                 { text: "Пройти игру сначала", next: 'start', timeCost: 0, reset: true }
             ]
@@ -307,14 +324,13 @@
 
         document.getElementById('scene-title').innerText = scene.title;
         document.getElementById('scene-text').innerText = scene.text;
-        
-        // Установка картинки из словаря
-        document.getElementById('scene-img').src = images[scene.imageKey] || images.scene1;
+        document.getElementById('scene-icon').innerText = scene.icon;
+        document.getElementById('scene-subtitle').innerText = scene.subtitle;
 
         let avatar = document.getElementById('speaker-avatar');
-        if (scene.speakerKey && images[scene.speakerKey]) {
-            avatar.src = images[scene.speakerKey];
-            avatar.style.display = 'block';
+        if (scene.speaker) {
+            avatar.innerText = scene.speaker;
+            avatar.style.display = 'flex';
         } else {
             avatar.style.display = 'none';
         }
@@ -351,11 +367,11 @@
             choicesBox.appendChild(btn);
         });
 
-        localStorage.setItem('santa_quest_full_state', JSON.stringify(state));
+        localStorage.setItem('santa_quest_icon_state', JSON.stringify(state));
     }
 
     window.onload = function() {
-        let saved = localStorage.getItem('santa_quest_full_state');
+        let saved = localStorage.getItem('santa_quest_icon_state');
         if (saved) {
             try {
                 let parsed = JSON.parse(saved);
