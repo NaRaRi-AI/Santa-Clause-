@@ -50,12 +50,29 @@
         .status-bar {
             display: flex;
             justify-content: space-around;
+            align-items: center;
             background: rgba(7, 12, 24, 0.95);
-            padding: 12px;
+            padding: 10px 12px;
             border-bottom: 1px solid rgba(180, 210, 232, 0.3);
             font-size: 13px;
             color: var(--accent-gold);
             text-shadow: 0 0 8px rgba(243, 198, 83, 0.4);
+        }
+
+        .audio-control {
+            background: transparent;
+            border: 1px solid var(--border-frost);
+            color: var(--accent-silver);
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s;
+        }
+
+        .audio-control:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
         }
 
         .scene-image {
@@ -133,10 +150,6 @@
             box-shadow: 0 6px 15px rgba(243, 198, 83, 0.2);
         }
 
-        button:active {
-            transform: translateY(0);
-        }
-
         .inventory-box {
             margin-top: 20px;
             padding-top: 12px;
@@ -153,10 +166,14 @@
 </head>
 <body>
 
+<!-- Аудиоэлемент настроен на soundtrack.mp4 -->
+<audio id="bg-music" src="soundtrack.mp4" loop preload="auto"></audio>
+
 <div class="game-container">
     <div class="status-bar">
         <span id="stat-time">🕒 Время: 12:00</span>
         <span id="stat-spirit">✨ Дух Рождества: 100%</span>
+        <button class="audio-control" id="music-toggle-btn" onclick="toggleMusic()">🎵 Музыка: вкл</button>
         <span id="stat-inventory">🎒 Предметы: нет</span>
     </div>
 
@@ -319,6 +336,35 @@
         }
     };
 
+    let isMusicPlaying = false;
+
+    function toggleMusic() {
+        let music = document.getElementById('bg-music');
+        let btn = document.getElementById('music-toggle-btn');
+        if (isMusicPlaying) {
+            music.pause();
+            isMusicPlaying = false;
+            btn.innerText = "🎵 Музыка: выкл";
+        } else {
+            music.play().then(() => {
+                isMusicPlaying = true;
+                btn.innerText = "🎵 Музыка: вкл";
+            }).catch(e => {
+                console.log("Автозапуск заблокирован браузером, нужен клик");
+            });
+        }
+    }
+
+    document.addEventListener('click', function initAudio() {
+        let music = document.getElementById('bg-music');
+        if (!isMusicPlaying && music.paused) {
+            music.play().then(() => {
+                isMusicPlaying = true;
+                document.getElementById('music-toggle-btn').innerText = "🎵 Музыка: вкл";
+            }).catch(e => {});
+        }
+    }, { once: true });
+
     function updateGame(sceneKey) {
         let scene = scenes[sceneKey];
         if (!scene) return;
@@ -371,11 +417,11 @@
             choicesBox.appendChild(btn);
         });
 
-        localStorage.setItem('santa_quest_final_state', JSON.stringify(state));
+        localStorage.setItem('santa_quest_full_ost_state', JSON.stringify(state));
     }
 
     window.onload = function() {
-        let saved = localStorage.getItem('santa_quest_final_state');
+        let saved = localStorage.getItem('santa_quest_full_ost_state');
         if (saved) {
             try {
                 let parsed = JSON.parse(saved);
